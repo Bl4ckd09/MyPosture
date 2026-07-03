@@ -18,8 +18,12 @@
 #include "esp_err.h"
 #include "esp_console.h"
 
+#include "esp_system.h"
 #include "esp_mac.h"
 #include "esp_wifi.h"
+#include "esp_netif.h"
+#include "lwip/err.h"
+#include "lwip/sys.h"
 #include "lwip/inet.h"
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"

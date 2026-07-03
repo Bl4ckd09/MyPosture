@@ -32,7 +32,7 @@ import serial
 from os import path
 from io import StringIO
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget
 from pyqtgraph import PlotWidget
 from PyQt5 import QtCore
 import pyqtgraph as pg

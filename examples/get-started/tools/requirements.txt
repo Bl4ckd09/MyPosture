@@ -5,3 +5,7 @@ path
 PyQt5
 pyqtgraph
 pyserial
+matplotlib
+scipy
+scikit-learn
+statsmodels
