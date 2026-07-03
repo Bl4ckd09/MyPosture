@@ -74,6 +74,9 @@ dkms.conf
 **/log
 **/data
 
+# router credentials / per-user runtime config (contains WiFi SSID + password)
+**/gui_config.json
+
 # node_modules
 docs/docusaurus/website/node_modules
 
