@@ -1,3 +1,28 @@
+> **Fork note.** This is a fork of [espressif/esp-csi](https://github.com/espressif/esp-csi).
+> Everything below the line is Espressif's documentation. This section describes what I used it for.
+
+## MyPosture: contactless posture sensing on an ESP32-S3
+
+I used this toolchain to capture WiFi Channel State Information on a single
+**ESP32-S3** and train a classifier that tells whether a person is **sitting,
+standing, walking or lying down**, with no camera and no wearable.
+
+**Dataset and trained model:**
+[huggingface.co/datasets/Marcolini/esp32s3-csi-har-2025](https://huggingface.co/datasets/Marcolini/esp32s3-csi-har-2025)
+(CC-BY-4.0). 80 labelled recordings, 192 subcarriers of raw I/Q at 19.8 Hz,
+windowed into 3,667 training samples, plus an INT8 ONNX model quantised to
+80 KB to fit `esp-dl` on the microcontroller itself.
+
+**What is mine in this repo:** two commits fixing the capture toolchain so the
+parser GUI would run (`a273469` PyQt5 imports, esp-radar and ML requirements;
+`a5d0f2d` stops tracking `gui_config.json`, which held WiFi credentials).
+The capture path is `examples/get-started/tools/csi_data_read_parse.py`.
+The recorded CSVs are gitignored here and live in the dataset above.
+
+The CSI capture code itself is Espressif's work, not mine.
+
+---
+
 # ESP-CSI [[中文]](./README_cn.md)
 
 ## Introduction to CSI
