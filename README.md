@@ -1,29 +1,71 @@
-> **Fork note.** This is a fork of [espressif/esp-csi](https://github.com/espressif/esp-csi).
-> Everything below the line is Espressif's documentation. This section describes what I used it for.
+# MyPosture: contactless posture sensing on an ESP32-S3
 
-## MyPosture: contactless posture sensing on an ESP32-S3
+Reads a room through **ordinary WiFi signal distortion** and classifies whether a
+person is **sitting, standing, walking or lying down**. No camera. No wearable.
+Inference is small enough to run on the microcontroller itself, so no signal
+data leaves the room.
 
-I used this toolchain to capture WiFi Channel State Information on a single
-**ESP32-S3** and train a classifier that tells whether a person is **sitting,
-standing, walking or lying down**, with no camera and no wearable.
+## Dataset and model
 
-**Dataset and trained model:**
-[huggingface.co/datasets/Marcolini/esp32s3-csi-har-2025](https://huggingface.co/datasets/Marcolini/esp32s3-csi-har-2025)
-(CC-BY-4.0). 80 labelled recordings, 192 subcarriers of raw I/Q at 19.8 Hz,
-windowed into 3,667 training samples, plus an INT8 ONNX model quantised to
-80 KB to fit `esp-dl` on the microcontroller itself.
+[**huggingface.co/datasets/Marcolini/esp32s3-csi-har-2025**](https://huggingface.co/datasets/Marcolini/esp32s3-csi-har-2025)
 
-**What is mine in this repo:** two commits fixing the capture toolchain so the
-parser GUI would run (`a273469` PyQt5 imports, esp-radar and ML requirements;
-`a5d0f2d` stops tracking `gui_config.json`, which held WiFi credentials).
-The capture path is `examples/get-started/tools/csi_data_read_parse.py`.
-The recorded CSVs are gitignored here and live in the dataset above.
+| | |
+|---|---|
+| Radio | ESP32-S3, single board, Espressif CSI parser |
+| Captured | 29 July 2025 |
+| Classes | sitting, standing, walking, lying |
+| Recordings | 80, twenty per class |
+| Sample rate | 19.823 Hz mean across all files |
+| Subcarriers | 192, stored as 384 interleaved I/Q values |
+| Windows | 3,667 samples of shape (19, 192) |
+| Licence | CC-BY-4.0 |
 
-The CSI capture code itself is Espressif's work, not mine.
+**Model.** A 1D CNN (Conv1D 32/64/128, global average pooling, Dense 4) reaching
+**77.7%** test accuracy on a held-out split. Quantised to **INT8 ONNX**, cutting
+the file from 272 KB to **80 KB** so it fits `esp-dl` on the microcontroller.
+
+The dataset repo ships `data/` (80 CSVs), `models/model_quant.onnx` (trained),
+`models/my_model.h5` (architecture only, saved before fit) and the training
+notebooks. The data card documents the DSP chain and the validation limits.
+
+**Honest limits.** One board, one room, one person, a single train/test split.
+This is a working prototype, not a validated system. Expect accuracy to drop in
+a new environment.
+
+## How the capture works
+
+```
+ESP32-S3  --WiFi CSI-->  serial  -->  csi_data_read_parse.py  -->  CSV
+                                                                    |
+                                          windowing + DSP + 1D CNN  |
+                                                                    v
+                                                    INT8 ONNX  -->  esp-dl
+```
+
+Capture command, run from `examples/get-started/tools`:
+
+```bash
+python csi_data_read_parse.py -p /dev/cu.usbmodem2101 -s ./csi_data.csv
+```
+
+One run per posture, then the file is renamed to its label. Recorded CSVs are
+gitignored in this repo and live in the dataset linked above.
+
+## What is mine in this fork
+
+Two commits repairing the capture toolchain so the parser GUI would run:
+`a273469` (PyQt5 imports, esp-radar dependency, ML requirements) and `a5d0f2d`
+(stops tracking `gui_config.json`, which held WiFi credentials). Everything
+else here, including all the CSI explanation below, is Espressif's work.
 
 ---
 
-# ESP-CSI [[中文]](./README_cn.md)
+# Espressif ESP-CSI documentation
+
+The sections below are the upstream [espressif/esp-csi](https://github.com/espressif/esp-csi)
+README, kept because it explains how WiFi CSI works and carries the reference
+diagrams for the three capture topologies.
+
 
 ## Introduction to CSI
 
