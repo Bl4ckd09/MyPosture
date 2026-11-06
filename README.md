@@ -20,6 +20,7 @@ The capture path is `examples/get-started/tools/csi_data_read_parse.py`.
 The recorded CSVs are gitignored here and live in the dataset above.
 
 The CSI capture code itself is Espressif's work, not mine.
+This fork does not run Espressif's Jira sync or component upload workflows.
 
 ---
 
